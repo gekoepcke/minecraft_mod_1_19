@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "forestree",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Forestree",
+  "description": "Mod that adds squirrels - so far",
   "authors": [
-    "Me!"
+    "Gero, Nikolas, Laurin"
   ],
   "contact": {
     "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "sources": ""
   },
 
   "license": "CC0-1.0",
