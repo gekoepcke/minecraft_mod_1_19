@@ -1,6 +1,8 @@
 package net.fabricmc.forestree;
 
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ai.goal.EscapeDangerGoal;
+import net.minecraft.entity.ai.goal.SwimGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.MobEntity;
@@ -17,6 +19,15 @@ public class SquirrelEntity extends AnimalEntity {
 
     public SquirrelEntity(EntityType<? extends SquirrelEntity> entityType, World world) {
         super(entityType, world);
+    }
+
+    protected void initGoals() {
+
+        Forestree.LOGGER.info("INIT GOALS");
+        this.goalSelector.add(0, new SwimGoal(this));
+        //this.goalSelector.add(1, new EscapeDangerGoal(this, 2.0));
+        this.goalSelector.add(1, new FleeOnTreeGoal(this, 2.0, 10, 10));
+
     }
 
     public static DefaultAttributeContainer.Builder createSquirrelAttributes() {
