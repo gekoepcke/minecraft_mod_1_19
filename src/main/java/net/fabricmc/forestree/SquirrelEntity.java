@@ -2,6 +2,7 @@ package net.fabricmc.forestree;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.SwimGoal;
+import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
 import net.minecraft.entity.ai.pathing.EntityNavigation;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -14,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class SquirrelEntity extends AnimalEntity {
     private boolean isClimbingWall;
-
 
 
     private static final double MAX_HEALTH = 5.0;
@@ -31,6 +31,7 @@ public class SquirrelEntity extends AnimalEntity {
         this.goalSelector.add(0, new SwimGoal(this));
         //this.goalSelector.add(1, new EscapeDangerGoal(this, 2.0));
         this.goalSelector.add(1, new FleeOnTreeGoal(this, 2.0, 10, 10));
+        this.goalSelector.add(2, new WanderAroundFarGoal(this, 1, 0));
 
     }
 
@@ -54,6 +55,7 @@ public class SquirrelEntity extends AnimalEntity {
     public void setClimbingWall(boolean climbing) {
         this.isClimbingWall = climbing;
     }
+
     public void tick() {
         super.tick();
         if (!this.world.isClient) {

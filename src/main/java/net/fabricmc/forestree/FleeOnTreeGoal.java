@@ -4,12 +4,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.Material;
-import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.MoveToTargetPosGoal;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -32,7 +30,7 @@ public class FleeOnTreeGoal extends MoveToTargetPosGoal {
         //targetPos = new BlockPos(100, 70, 100);
     }
 
-    private void findNearestTree(){
+    private void debug(){
         /*
         Forestree.LOGGER.info("LOOKING FOR TREE");
         Forestree.LOGGER.info(String.valueOf(mob.getPos()));
@@ -43,18 +41,27 @@ public class FleeOnTreeGoal extends MoveToTargetPosGoal {
         Forestree.LOGGER.info(String.valueOf(mob));
     }
 
-    @Override
-    public void tick(){
-        if(!isTree(mob.world, targetPos)){
-            findTargetPos();
-        }
-        super.tick();
-    }
 
     @Override
     public boolean canStart() {
-        findNearestTree();
-        return !(targetPos.equals(mob.getBlockPos()));
+        //ob angefangen werden kann sich zu bewegen. targetpos muss drin gesetzt werden
+
+        //super.canStart
+        if (this.cooldown > 0) {
+            --this.cooldown;
+            return false;
+        } else {
+            Forestree.LOGGER.info("cooldown expired");
+            this.cooldown = this.getInterval(this.mob);
+            return this.findTargetPos();
+        }
+        //super.canstart end
+    }
+
+    @Override
+    protected boolean findTargetPos() {
+        Forestree.LOGGER.info("looking for target pos");
+        return super.findTargetPos();
     }
 
     private boolean isLeaf(BlockPos pos, Chunk chunk) {
@@ -77,7 +84,6 @@ public class FleeOnTreeGoal extends MoveToTargetPosGoal {
         if (chunk == null) {
             return false;
         } else {
-            Forestree.LOGGER.info(String.valueOf(pos));
             return isLeaf(pos, chunk) && isLog(pos.down(), chunk) && isLog(pos.down().down(), chunk);
         }
     }
