@@ -57,7 +57,7 @@ public class FleeOnTreeGoal extends MoveToTargetPosGoal {
     }
 
     protected void startMovingToTarget() {
-        this.mob.getNavigation().startMovingTo((double) ((float) this.targetPos.getX()) + 0.5, this.targetPos.getY(), (double) ((float) this.targetPos.getZ()) + 0.5, this.speed);
+        this.mob.getNavigation().startMovingTo((double) ((float) this.targetPos.getX()), this.targetPos.getY(), (double) ((float) this.targetPos.getZ()), this.speed);
     }
 
     private boolean isTree(WorldView world, BlockPos pos) {
