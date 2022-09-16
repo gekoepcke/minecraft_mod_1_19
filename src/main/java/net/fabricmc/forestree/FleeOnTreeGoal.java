@@ -16,8 +16,6 @@ import java.util.EnumSet;
 
 public class FleeOnTreeGoal extends MoveToTargetPosGoal {
 
-    private static final Block[] Leaves = new Block[]{Blocks.ACACIA_LEAVES, Blocks.AZALEA_LEAVES,
-            Blocks.BIRCH_LEAVES, Blocks.OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES};
     private static final Block[] Wood = new Block[]{Blocks.ACACIA_LOG, Blocks.BIRCH_LOG, Blocks.JUNGLE_LOG, Blocks.OAK_LOG, Blocks.DARK_OAK_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG};
 
 
@@ -26,33 +24,15 @@ public class FleeOnTreeGoal extends MoveToTargetPosGoal {
         this.targetPos = BlockPos.ORIGIN;
         this.lowestY = 0;
         this.setControls(EnumSet.of(Control.MOVE, Control.JUMP));
-        //TESTING
-        //targetPos = new BlockPos(100, 70, 100);
     }
-
-    private void debug(){
-        /*
-        Forestree.LOGGER.info("LOOKING FOR TREE");
-        Forestree.LOGGER.info(String.valueOf(mob.getPos()));
-        Forestree.LOGGER.info(String.valueOf(mob.getSyncedPos()));
-        Forestree.LOGGER.info(String.valueOf(mob.getBlockPos()));
-         */
-
-        Forestree.LOGGER.info(String.valueOf(mob));
-    }
-
 
     @Override
     public boolean canStart() {
         //ob angefangen werden kann sich zu bewegen. targetpos muss drin gesetzt werden
-
-        //super.canStart
-
         if (this.mob.getAttacker() != null) {
             return this.findTargetPos();
         }
         return false;
-        //super.canstart end
     }
 
     @Override
@@ -77,10 +57,10 @@ public class FleeOnTreeGoal extends MoveToTargetPosGoal {
     }
 
     protected void startMovingToTarget() {
-        this.mob.getNavigation().startMovingTo((double)((float)this.targetPos.getX()) + 0.5, (double)(this.targetPos.getY()), (double)((float)this.targetPos.getZ()) + 0.5, this.speed);
+        this.mob.getNavigation().startMovingTo((double) ((float) this.targetPos.getX()) + 0.5, this.targetPos.getY(), (double) ((float) this.targetPos.getZ()) + 0.5, this.speed);
     }
 
-    private boolean isTree(WorldView world, BlockPos pos){
+    private boolean isTree(WorldView world, BlockPos pos) {
         Chunk chunk = world.getChunk(ChunkSectionPos.getSectionCoord(pos.getX()), ChunkSectionPos.getSectionCoord(pos.getZ()), ChunkStatus.FULL, false);
         if (chunk == null) {
             return false;
@@ -91,11 +71,6 @@ public class FleeOnTreeGoal extends MoveToTargetPosGoal {
 
     @Override
     protected boolean isTargetPos(WorldView world, BlockPos pos) {
-        /*
-        boolean temp = targetPos.equals(mob.getBlockPos());
-        Forestree.LOGGER.info(String.valueOf(temp));
-        return (temp);
-         */
         return isTree(world, pos);
     }
 }

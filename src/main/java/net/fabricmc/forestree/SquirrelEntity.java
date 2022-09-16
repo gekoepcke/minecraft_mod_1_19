@@ -29,7 +29,6 @@ public class SquirrelEntity extends AnimalEntity {
 
         Forestree.LOGGER.info("INIT GOALS");
         this.goalSelector.add(0, new SwimGoal(this));
-        //this.goalSelector.add(1, new EscapeDangerGoal(this, 2.0));
         this.goalSelector.add(1, new FleeOnTreeGoal(this, 2.0, 10, 10));
         this.goalSelector.add(2, new WanderAroundFarGoal(this, 1, 0));
 
