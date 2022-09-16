@@ -47,14 +47,11 @@ public class FleeOnTreeGoal extends MoveToTargetPosGoal {
         //ob angefangen werden kann sich zu bewegen. targetpos muss drin gesetzt werden
 
         //super.canStart
-        if (this.cooldown > 0) {
-            --this.cooldown;
-            return false;
-        } else {
-            Forestree.LOGGER.info("cooldown expired");
-            this.cooldown = this.getInterval(this.mob);
+
+        if (this.mob.getAttacker() != null) {
             return this.findTargetPos();
         }
+        return false;
         //super.canstart end
     }
 
@@ -77,6 +74,10 @@ public class FleeOnTreeGoal extends MoveToTargetPosGoal {
             }
         }
         return false;
+    }
+
+    protected void startMovingToTarget() {
+        this.mob.getNavigation().startMovingTo((double)((float)this.targetPos.getX()) + 0.5, (double)(this.targetPos.getY()), (double)((float)this.targetPos.getZ()) + 0.5, this.speed);
     }
 
     private boolean isTree(WorldView world, BlockPos pos){
