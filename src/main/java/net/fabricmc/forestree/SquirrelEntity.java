@@ -1,6 +1,9 @@
 package net.fabricmc.forestree;
 
-import net.minecraft.block.Material;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.ai.goal.SwimGoal;
@@ -12,9 +15,21 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.tag.BlockTags;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
+import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class SquirrelEntity extends AnimalEntity {
     private boolean isClimbingWall;
@@ -23,14 +38,17 @@ public class SquirrelEntity extends AnimalEntity {
     private static final double MAX_HEALTH = 5.0;
     private static final double MOVEMENT_SPEED = 0.25;
 
+    // copied private fields used by copied private methods
+    private float nextStepSoundDistance;
+    private int lastChimeAge;
+    private float lastChimeIntensity;
+
     public SquirrelEntity(EntityType<? extends SquirrelEntity> entityType, World world) {
         super(entityType, world);
         isClimbingWall = false;
     }
 
     protected void initGoals() {
-
-        Forestree.LOGGER.info("INIT GOALS");
         this.goalSelector.add(0, new SwimGoal(this));
         this.goalSelector.add(1, new FleeOnTreeGoal(this, 2.0, 10, 10));
         this.goalSelector.add(2, new WanderAroundFarGoal(this, 1, 0));
@@ -81,13 +99,47 @@ public class SquirrelEntity extends AnimalEntity {
         return null;
     }
 
-    @Override
-    public void move(MovementType movementType, Vec3d movement) {
-        this.noClip = this.world.getBlockState(this.getBlockPos().up()).getMaterial() == Material.LEAVES;
-        super.move(movementType, movement);
+    private void playAmethystChimeSound(BlockState state) {  // copied private method from Entity
+        if (state.isIn(BlockTags.CRYSTAL_SOUND_BLOCKS) && this.age >= this.lastChimeAge + 20) {
+            this.lastChimeIntensity *= (float) Math.pow(0.997, this.age - this.lastChimeAge);
+            this.lastChimeIntensity = Math.min(1.0F, this.lastChimeIntensity + 0.07F);
+            float f = 0.5F + this.lastChimeIntensity * this.random.nextFloat() * 1.2F;
+            float g = 0.1F + this.lastChimeIntensity * 1.2F;
+            this.playSound(SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME, g, f);
+            this.lastChimeAge = this.age;
+        }
+
     }
 
-    /*    public void move(MovementType movementType, Vec3d movement) {
+    private Vec3d adjustMovementForCollisions(Vec3d movement) {  // copied private method from Entity
+        Box box = this.getBoundingBox();
+        List<VoxelShape> list = this.world.getEntityCollisions(this, box.stretch(movement));
+        Vec3d vec3d = movement.lengthSquared() == 0.0 ? movement : adjustMovementForCollisions(this, movement, box, this.world, list);
+        boolean bl = movement.x != vec3d.x;
+        boolean bl2 = movement.y != vec3d.y;
+        boolean bl3 = movement.z != vec3d.z;
+        boolean bl4 = this.onGround || bl2 && movement.y < 0.0;
+        if (this.stepHeight > 0.0F && bl4 && (bl || bl3)) {
+            Vec3d vec3d2 = adjustMovementForCollisions(this, new Vec3d(movement.x, this.stepHeight, movement.z), box, this.world, list);
+            Vec3d vec3d3 = adjustMovementForCollisions(this, new Vec3d(0.0, this.stepHeight, 0.0), box.stretch(movement.x, 0.0, movement.z), this.world, list);
+            if (vec3d3.y < (double) this.stepHeight) {
+                Vec3d vec3d4 = adjustMovementForCollisions(this, new Vec3d(movement.x, 0.0, movement.z), box.offset(vec3d3), this.world, list).add(vec3d3);
+                if (vec3d4.horizontalLengthSquared() > vec3d2.horizontalLengthSquared()) {
+                    vec3d2 = vec3d4;
+                }
+            }
+
+            if (vec3d2.horizontalLengthSquared() > vec3d.horizontalLengthSquared()) {
+                return vec3d2.add(adjustMovementForCollisions(this, new Vec3d(0.0, -vec3d2.y + movement.y, 0.0), box.offset(vec3d2), this.world, list));
+            }
+        }
+
+        return vec3d;
+    }
+
+
+    @Override
+    public void move(MovementType movementType, Vec3d movement) {
         if (this.noClip) {
             this.setPosition(this.getX() + movement.x, this.getY() + movement.y, this.getZ() + movement.z);
         } else {
@@ -159,14 +211,14 @@ public class SquirrelEntity extends AnimalEntity {
                     double e = vec3d.x;
                     double f = vec3d.y;
                     double g = vec3d.z;
-                    this.speed += (float)(vec3d.length() * 0.6);
+                    this.speed += (float) (vec3d.length() * 0.6);
                     boolean bl3 = blockState.isIn(BlockTags.CLIMBABLE) || blockState.isOf(Blocks.POWDER_SNOW);
                     if (!bl3) {
                         f = 0.0;
                     }
 
-                    this.horizontalSpeed += (float)vec3d.horizontalLength() * 0.6F;
-                    this.distanceTraveled += (float)Math.sqrt(e * e + f * f + g * g) * 0.6F;
+                    this.horizontalSpeed += (float) vec3d.horizontalLength() * 0.6F;
+                    this.distanceTraveled += (float) Math.sqrt(e * e + f * f + g * g) * 0.6F;
                     if (this.distanceTraveled > this.nextStepSoundDistance && !blockState.isAir()) {
                         this.nextStepSoundDistance = this.calculateNextStepSoundDistance();
                         if (this.isTouchingWater()) {
@@ -174,7 +226,7 @@ public class SquirrelEntity extends AnimalEntity {
                                 Entity entity = this.hasPassengers() && this.getPrimaryPassenger() != null ? this.getPrimaryPassenger() : this;
                                 float h = entity == this ? 0.35F : 0.4F;
                                 Vec3d vec3d3 = entity.getVelocity();
-                                float i = Math.min(1.0F, (float)Math.sqrt(vec3d3.x * vec3d3.x * 0.20000000298023224 + vec3d3.y * vec3d3.y + vec3d3.z * vec3d3.z * 0.20000000298023224) * h);
+                                float i = Math.min(1.0F, (float) Math.sqrt(vec3d3.x * vec3d3.x * 0.20000000298023224 + vec3d3.y * vec3d3.y + vec3d3.z * vec3d3.z * 0.20000000298023224) * h);
                                 this.playSwimSound(i);
                             }
 
@@ -188,7 +240,7 @@ public class SquirrelEntity extends AnimalEntity {
                             }
 
                             if (moveEffect.emitsGameEvents() && (this.onGround || movement.y == 0.0 || this.inPowderSnow || bl3)) {
-                                this.world.emitGameEvent(GameEvent.STEP, this.pos, GameEvent.Emitter.of(this, this.getSteppingBlockState()));
+                                this.world.emitGameEvent(GameEvent.STEP, this.getPos(), GameEvent.Emitter.of(this, this.getSteppingBlockState()));
                             }
                         }
                     } else if (blockState.isAir()) {
@@ -198,11 +250,9 @@ public class SquirrelEntity extends AnimalEntity {
 
                 this.tryCheckBlockCollision();
                 float j = this.getVelocityMultiplier();
-                this.setVelocity(this.getVelocity().multiply((double)j, 1.0, (double)j));
-                if (this.world.getStatesInBoxIfLoaded(this.getBoundingBox().contract(1.0E-6)).noneMatch((state) -> {
-                    return state.isIn(BlockTags.FIRE) || state.isOf(Blocks.LAVA);
-                })) {
-                    if (this.fireTicks <= 0) {
+                this.setVelocity(this.getVelocity().multiply(j, 1.0, j));
+                if (this.world.getStatesInBoxIfLoaded(this.getBoundingBox().contract(1.0E-6)).noneMatch((state) -> state.isIn(BlockTags.FIRE) || state.isOf(Blocks.LAVA))) {
+                    if (this.getFireTicks() <= 0) {
                         this.setFireTicks(-this.getBurningDuration());
                     }
 
@@ -219,6 +269,5 @@ public class SquirrelEntity extends AnimalEntity {
             }
         }
     }
-*/
 
 }

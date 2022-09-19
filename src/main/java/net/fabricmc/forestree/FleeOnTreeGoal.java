@@ -37,7 +37,6 @@ public class FleeOnTreeGoal extends MoveToTargetPosGoal {
 
     @Override
     protected boolean findTargetPos() {
-        Forestree.LOGGER.info("looking for target pos");
         return super.findTargetPos();
     }
 
@@ -57,7 +56,7 @@ public class FleeOnTreeGoal extends MoveToTargetPosGoal {
     }
 
     protected void startMovingToTarget() {
-        this.mob.getNavigation().startMovingTo((double) ((float) this.targetPos.getX()), this.targetPos.getY(), (double) ((float) this.targetPos.getZ()), this.speed);
+        this.mob.getNavigation().startMovingTo((float) this.targetPos.getX(), this.targetPos.getY(), (float) this.targetPos.getZ(), this.speed);
     }
 
     private boolean isTree(WorldView world, BlockPos pos) {
