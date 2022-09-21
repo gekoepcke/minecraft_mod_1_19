@@ -1,5 +1,7 @@
-package net.fabricmc.forestree;
+package net.fabricmc.forestree.entity.squirrel;
 
+import net.fabricmc.forestree.entity.goals.FleeOnTreeGoal;
+import net.fabricmc.forestree.entity.moveThroughLeavesEntity.MoveThroughLeavesEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.SwimGoal;
 import net.minecraft.entity.ai.goal.WanderAroundFarGoal;

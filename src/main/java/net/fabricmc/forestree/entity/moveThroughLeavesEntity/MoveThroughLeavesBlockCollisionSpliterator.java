@@ -1,5 +1,5 @@
 
-package net.fabricmc.forestree;
+package net.fabricmc.forestree.entity.moveThroughLeavesEntity;
 
 import com.google.common.collect.AbstractIterator;
 import net.minecraft.block.BlockState;
@@ -20,7 +20,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.CollisionView;
 import org.jetbrains.annotations.Nullable;
 
-public class SquirrelBlockCollisionSpliterator extends AbstractIterator<VoxelShape> {
+public class MoveThroughLeavesBlockCollisionSpliterator extends AbstractIterator<VoxelShape> {
     private final Box box;
     private final ShapeContext context;
     private final CuboidBlockIterator blockIterator;
@@ -32,11 +32,11 @@ public class SquirrelBlockCollisionSpliterator extends AbstractIterator<VoxelSha
     private BlockView chunk;
     private long chunkPos;
 
-    public SquirrelBlockCollisionSpliterator(CollisionView world, @Nullable Entity entity, Box box) {
+    public MoveThroughLeavesBlockCollisionSpliterator(CollisionView world, @Nullable Entity entity, Box box) {
         this(world, entity, box, false);
     }
 
-    public SquirrelBlockCollisionSpliterator(CollisionView world, @Nullable Entity entity, Box box, boolean forEntity) {
+    public MoveThroughLeavesBlockCollisionSpliterator(CollisionView world, @Nullable Entity entity, Box box, boolean forEntity) {
         this.context = entity == null ? ShapeContext.absent() : ShapeContext.of(entity);
         this.pos = new BlockPos.Mutable();
         this.boxShape = VoxelShapes.cuboid(box);
@@ -86,17 +86,22 @@ public class SquirrelBlockCollisionSpliterator extends AbstractIterator<VoxelSha
                 this.pos.set(i, j, k);
                 BlockState blockState = blockView.getBlockState(this.pos);
 
-                // only change made:
-                if (blockState.getMaterial() == Material.LEAVES) {
-                    continue;
-                }
-                // ---
 
                 if (this.forEntity && !blockState.shouldSuffocate(blockView, this.pos) || l == 1 && !blockState.exceedsCube() || l == 2 && !blockState.isOf(Blocks.MOVING_PISTON)) {
                     continue;
                 }
 
                 VoxelShape voxelShape = blockState.getCollisionShape(this.world, this.pos, this.context);
+
+                // only change made:
+                if (blockState.getMaterial() == Material.LEAVES) {
+                    if (context.isAbove(VoxelShapes.fullCube(), pos, true)) {
+                        return voxelShape.offset(i, j, k);
+                    }
+                    continue;
+                }
+                // ---
+
                 if (voxelShape == VoxelShapes.fullCube()) {
                     if (!this.box.intersects(i, j, k, (double) i + 1.0, (double) j + 1.0, (double) k + 1.0)) {
                         continue;

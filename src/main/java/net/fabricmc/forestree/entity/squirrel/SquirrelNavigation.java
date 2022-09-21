@@ -1,4 +1,4 @@
-package net.fabricmc.forestree;
+package net.fabricmc.forestree.entity.squirrel;
 
 import net.minecraft.entity.ai.pathing.SpiderNavigation;
 import net.minecraft.entity.mob.MobEntity;

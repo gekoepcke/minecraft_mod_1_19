@@ -1,4 +1,4 @@
-package net.fabricmc.forestree;
+package net.fabricmc.forestree.entity.moveThroughLeavesEntity;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
@@ -88,7 +88,7 @@ public class MoveThroughLeavesEntity extends PathAwareEntity {
         }
 
         // replaced: builder.addAll(world.getBlockCollisions(entity, entityBoundingBox.stretch(movement)));
-        builder.addAll(new SquirrelBlockCollisionSpliterator(world, entity, entityBoundingBox.stretch(movement)));
+        builder.addAll(new MoveThroughLeavesBlockCollisionSpliterator(world, entity, entityBoundingBox.stretch(movement)));
 
         return adjustMovementForCollisions(movement, entityBoundingBox, builder.build());
     }

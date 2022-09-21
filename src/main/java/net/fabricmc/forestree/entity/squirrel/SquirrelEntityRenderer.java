@@ -1,5 +1,6 @@
-package net.fabricmc.forestree;
+package net.fabricmc.forestree.entity.squirrel;
 
+import net.fabricmc.forestree.ForestreeClient;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.util.Identifier;

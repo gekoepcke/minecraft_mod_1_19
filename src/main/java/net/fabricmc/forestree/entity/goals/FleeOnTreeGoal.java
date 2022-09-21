@@ -1,4 +1,4 @@
-package net.fabricmc.forestree;
+package net.fabricmc.forestree.entity.goals;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

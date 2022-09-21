@@ -1,4 +1,4 @@
-package net.fabricmc.forestree;
+package net.fabricmc.forestree.entity.squirrel;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.model.*;
